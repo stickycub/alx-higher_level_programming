@@ -1,55 +1,81 @@
 #include "lists.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /**
-*add_nodeint - adds a new node at the beginning of a listint_t list
-*@head: head of listint_t
-*@n: int to add in listint_t list
-*Return: address of the new element, or NULL if it failed
-*/
+ * find_middle - Finds the middle of the linked list
+ * @head: Pointer to the head of the list
+ *
+ * Return: Pointer to the middle node of the list
+ */
 
-listint_t *add_nodeint(listint_t **head, const int n)
+listint_t *find_middle(listint_t *head)
 {
-	listint_t *new;
+	listint_t *slow = head, *fast = head;
 
-	new = malloc(sizeof(listint_t));
-	if (new == NULL)
-		return (NULL);
-	new->n = n;
-	new->next = *head;
-	*head = new;
-	return (new);
+	while (fast != NULL && fast->next != NULL)
+	{
+		fast = fast->next->next;
+		slow = slow->next;
+	}
+
+	return (slow);
 }
 
 /**
-*is_palindrome - identify if a syngle linked list is palindrome
-*@head: head of listint_t
-*Return: 1 if it is palindrome else 0
-*/
+ * reverse_list - Reverses a linked list
+ * @head: Pointer to the head of the list
+ *
+ * Return: Pointer to the head of the reversed list
+ */
+
+listint_t *reverse_list(listint_t *head)
+{
+	listint_t *prev = NULL, *current = head, *next = NULL;
+
+	while (current != NULL)
+	{
+		next = current->next;
+		current->next = prev;
+		prev = current;
+		current = next;
+	}
+
+	return (prev);
+}
+
+/**
+ * is_palindrome - Checks if a singly linked list is a palindrome
+ * @head: Pointer to a pointer to the head of the list
+ *
+ * Return: 1 if the list is a palindrome, 0 otherwise
+ */
+
 int is_palindrome(listint_t **head)
 {
-	listint_t *head2 = *head;
-	listint_t *aux = NULL, *aux2 = NULL;
-
-	if (*head == NULL || head2->next == NULL)
+	if (*head == NULL || (*head)->next == NULL)
 		return (1);
-	while (head2 != NULL)
+
+	listint_t *mid = find_middle(*head);
+	listint_t *second_half = reverse_list(mid->next);
+
+	listint_t *first_half = *head;
+	listint_t *second_half_copy = second_half;
+
+	int is_palindrome = 1;
+
+	while (first_half != NULL && second_half != NULL)
 	{
-		add_nodeint(&aux, head2->n);
-		head2 = head2->next;
-	}
-	aux2 = aux;
-	while (*head != NULL)
-	{
-		if ((*head)->n != aux2->n)
+		if (first_half->n != second_half->n)
 		{
-			free_listint(aux);
-			return (0);
+			is_palindrome = 0;
+			break;
 		}
-		*head = (*head)->next;
-		aux2 = aux2->next;
+		first_half = first_half->next;
+		second_half = second_half->next;
 	}
-	free_listint(aux);
-	return (1);
+
+	mid->next = reverse_list(second_half_copy);
+
+	return (is_palindrome);
 }
